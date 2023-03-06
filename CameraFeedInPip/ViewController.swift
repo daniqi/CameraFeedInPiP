@@ -12,9 +12,9 @@ class ViewController: UIViewController {
     
     var pipVideoCallViewController: AVPictureInPictureVideoCallViewController?
     
-    private var createVideoControllerButton: UIButton = {
+    private var startPipButton: UIButton = {
        var button = UIButton()
-        button.setTitle("CreateVideoController", for: .normal)
+        button.setTitle("Start PiP", for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.backgroundColor = .blue
         return button
@@ -27,11 +27,16 @@ class ViewController: UIViewController {
         
         view.backgroundColor = .white
         
-        addCreateVideoControllerButtonToView()
         captureCamera()
         previewView = PreviewView(captureSession: captureSession)
-        addPreviewView()
         
+        
+        pipVideoCallViewController = AVPictureInPictureVideoCallViewController()
+        pipVideoCallViewController?.view?.addSubview(self.previewView!)
+        
+        view.addSubview(pipVideoCallViewController!.view)
+        
+        addStartPiPButton()
         
         NotificationCenter.default.addObserver(self, selector: #selector(ViewController.sessionWasInterrupted(notification:)), name: NSNotification.Name.AVCaptureSessionWasInterrupted, object: captureSession)
         
@@ -54,8 +59,8 @@ class ViewController: UIViewController {
           captureSession.addInput(front)
         }
 
-        captureSession.commitConfiguration()
         captureSession.isMultitaskingCameraAccessEnabled = true
+        captureSession.commitConfiguration()
         
         print("multitaskingCameraAccessSupported: \(captureSession.isMultitaskingCameraAccessSupported)")
         print("multitaskingCameraAccessEnabled: \(captureSession.isMultitaskingCameraAccessEnabled)")
@@ -65,44 +70,30 @@ class ViewController: UIViewController {
         backgroundQueue.async {
             self.captureSession.startRunning()
         }
+        
     }
     
     @objc
-    private func createVideoCallController() {
-        pipVideoCallViewController = AVPictureInPictureVideoCallViewController()
-        pipVideoCallViewController?.view?.addSubview(self.previewView!)
-        
+    private func startPip() {
         let pipContentSource = AVPictureInPictureController.ContentSource(
-            activeVideoCallSourceView: self.previewView!,
+            activeVideoCallSourceView: self.pipVideoCallViewController!.view,
                 contentViewController: pipVideoCallViewController!)
-        
-//        let pipController = AVPictureInPictureController(contentSource: pipContentSource)
-//        pipController.canStartPictureInPictureAutomaticallyFromInline = true
-//        pipController.delegate = self
-//
-//        pipVideoCallViewController!.preferredContentSize = view.frame.size
-//        pipController.startPictureInPicture()
+
+        let pipController = AVPictureInPictureController(contentSource: pipContentSource)
+        pipController.canStartPictureInPictureAutomaticallyFromInline = true
+        pipController.delegate = self
+
+        pipController.startPictureInPicture()
         
     }
     
-    private func addCreateVideoControllerButtonToView() {
-        createVideoControllerButton.addTarget(self, action: #selector(createVideoCallController), for: .touchUpInside)
-        view.addSubview(createVideoControllerButton)
+    private func addStartPiPButton() {
+        startPipButton.addTarget(self, action: #selector(startPip), for: .touchUpInside)
+        view.addSubview(startPipButton)
         
         NSLayoutConstraint.activate([
-            createVideoControllerButton.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
-            createVideoControllerButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor, constant: 0),
-        ])
-    }
-    
-    private func addPreviewView() {
-        view.addSubview(previewView!)
-        
-        NSLayoutConstraint.activate([
-            previewView!.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: 10),
-            previewView!.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: 10),
-            previewView!.widthAnchor.constraint(equalToConstant: 500),
-            previewView!.heightAnchor.constraint(equalToConstant: 500),
+            startPipButton.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
+            startPipButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor, constant: 0),
         ])
     }
     

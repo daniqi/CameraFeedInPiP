@@ -20,8 +20,6 @@ class PreviewView: UIView {
     public init(captureSession: AVCaptureSession) {
         super.init(frame: .zero)
         
-        translatesAutoresizingMaskIntoConstraints = false
-        
         videoDisplayLayer.session = captureSession
         videoDisplayLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
         videoDisplayLayer.frame = CGRect(x: 0, y: 0, width: 500, height: 500)
