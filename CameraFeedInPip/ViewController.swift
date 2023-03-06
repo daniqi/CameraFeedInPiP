@@ -10,9 +10,11 @@ import AVKit
 
 class ViewController: UIViewController {
     
-    private var activatePipButton: UIButton = {
+    var pipVideoCallViewController: AVPictureInPictureVideoCallViewController?
+    
+    private var createVideoControllerButton: UIButton = {
        var button = UIButton()
-        button.setTitle("Activate Pip", for: .normal)
+        button.setTitle("CreateVideoController", for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.backgroundColor = .blue
         return button
@@ -25,14 +27,22 @@ class ViewController: UIViewController {
         
         view.backgroundColor = .white
         
-        addButtonToView()
+        addCreateVideoControllerButtonToView()
         captureCamera()
         previewView = PreviewView(captureSession: captureSession)
         addPreviewView()
+        
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.sessionWasInterrupted(notification:)), name: NSNotification.Name.AVCaptureSessionWasInterrupted, object: captureSession)
+        
     }
      
     var captureSession: AVCaptureSession = AVCaptureSession()
     var frontInput: AVCaptureInput?
+    
+    @objc func sessionWasInterrupted(notification: Notification) {
+        print(notification)
+    }
 
     private func captureCamera() {
         if let frontDevice = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: AVMediaType.video, position: .front).devices.first {
@@ -45,6 +55,10 @@ class ViewController: UIViewController {
         }
 
         captureSession.commitConfiguration()
+        captureSession.isMultitaskingCameraAccessEnabled = true
+        
+        print(captureSession.isMultitaskingCameraAccessSupported)
+        print(captureSession.isMultitaskingCameraAccessEnabled)
         
         let backgroundQueue = DispatchQueue(label: "com.app.queue", qos: .background)
         
@@ -54,38 +68,30 @@ class ViewController: UIViewController {
     }
     
     @objc
-    private func startPip() {
-        let pipVideoController = AVPictureInPictureVideoCallViewController()
-        pipVideoController.view?.addSubview(self.view)
+    private func createVideoCallController() {
+        pipVideoCallViewController = AVPictureInPictureVideoCallViewController()
+        pipVideoCallViewController?.view?.addSubview(self.previewView!)
         
         let pipContentSource = AVPictureInPictureController.ContentSource(
-            activeVideoCallSourceView: previewView!,
-                contentViewController: pipVideoController)
+            activeVideoCallSourceView: self.previewView!,
+                contentViewController: pipVideoCallViewController!)
         
-        
-        present(pipVideoController, animated: false)
 //        let pipController = AVPictureInPictureController(contentSource: pipContentSource)
-        
-//        pipVideoController.preferredContentSize = view.frame.size
-//
-//        // To start PiP automatically when app goes to background
 //        pipController.canStartPictureInPictureAutomaticallyFromInline = true
-        
-//        pipController.playerLayer.player?.play()
+//        pipController.delegate = self
 //
-//        print(pipController.playerLayer.isReadyForDisplay)
-//
-//        // Or you can start PiP manually
+//        pipVideoCallViewController!.preferredContentSize = view.frame.size
 //        pipController.startPictureInPicture()
+        
     }
     
-    private func addButtonToView() {
-        activatePipButton.addTarget(self, action: #selector(startPip), for: .touchUpInside)
-        view.addSubview(activatePipButton)
+    private func addCreateVideoControllerButtonToView() {
+        createVideoControllerButton.addTarget(self, action: #selector(createVideoCallController), for: .touchUpInside)
+        view.addSubview(createVideoControllerButton)
         
         NSLayoutConstraint.activate([
-            activatePipButton.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
-            activatePipButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor, constant: 80),
+            createVideoControllerButton.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
+            createVideoControllerButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor, constant: 0),
         ])
     }
     
@@ -99,5 +105,18 @@ class ViewController: UIViewController {
             previewView!.heightAnchor.constraint(equalToConstant: 500),
         ])
     }
+    
 }
 
+extension ViewController: AVPictureInPictureControllerDelegate {
+    func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        print("pip controller will start pip")
+        print(pictureInPictureController)
+    }
+    
+    func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController, failedToStartPictureInPictureWithError error: Error) {
+        print("error when starintg pip")
+        print(error)
+    }
+    
+}

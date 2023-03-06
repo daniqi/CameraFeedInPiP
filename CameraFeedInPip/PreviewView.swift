@@ -9,25 +9,22 @@ import UIKit
 import AVKit
 
 class PreviewView: UIView {
+    override class var layerClass: AnyClass {
+        AVCaptureVideoPreviewLayer.self
+    }
     
-    var previewLayer: AVCaptureVideoPreviewLayer?
-
+    var videoDisplayLayer: AVCaptureVideoPreviewLayer {
+        layer as! AVCaptureVideoPreviewLayer
+    }
+ 
     public init(captureSession: AVCaptureSession) {
-        
         super.init(frame: .zero)
         
-        backgroundColor = .red
         translatesAutoresizingMaskIntoConstraints = false
         
-        previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
-        
-        DispatchQueue.main.async {
-            self.previewLayer?.frame = CGRect(x: 0, y: 0, width: 500, height: 500)
-        }
-        
-        layer.addSublayer(previewLayer!)
-        
+        videoDisplayLayer.session = captureSession
+        videoDisplayLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
+        videoDisplayLayer.frame = CGRect(x: 0, y: 0, width: 500, height: 500)
     }
     
     required init?(coder aDecoder: NSCoder) {
