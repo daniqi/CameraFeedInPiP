@@ -13,6 +13,15 @@ class PreviewView: UIView {
         AVCaptureVideoPreviewLayer.self
     }
     
+    // TOOD: use AVSampleBufferDisplayLayer
+    // https://stackoverflow.com/questions/71419635/how-to-add-picture-in-picture-pip-for-webrtc-video-calls-in-ios-swift
+    
+    // Deze zet het om view naar buffer:
+    // https://github.com/uakihir0/UIPiPView/blob/main/UIPiPView/Classes/UIView%2B.swift
+    
+    // Capture output:
+    // https://anuragajwani.medium.com/how-to-process-images-real-time-from-the-ios-camera-9c416c531749
+    
     var videoDisplayLayer: AVCaptureVideoPreviewLayer {
         layer as! AVCaptureVideoPreviewLayer
     }
@@ -28,4 +37,6 @@ class PreviewView: UIView {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    
 }

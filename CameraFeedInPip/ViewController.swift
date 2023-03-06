@@ -21,15 +21,17 @@ class ViewController: UIViewController {
     }()
     
     private var previewView: PreviewView?
+    
+    private let videoOutput = AVCaptureVideoDataOutput()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = .white
         
+        setupSession()
         captureCamera()
-        previewView = PreviewView(captureSession: captureSession)
-        
+        previewView = PreviewView(captureSession: captureSession!)
         
         pipVideoCallViewController = AVPictureInPictureVideoCallViewController()
         pipVideoCallViewController?.view?.addSubview(self.previewView!)
@@ -42,33 +44,37 @@ class ViewController: UIViewController {
         
     }
      
-    var captureSession: AVCaptureSession = AVCaptureSession()
+    var captureSession: AVCaptureSession?
     var frontInput: AVCaptureInput?
     
     @objc func sessionWasInterrupted(notification: Notification) {
         print(notification)
     }
+    
+    private func setupSession() {
+        captureSession = AVCaptureSession()
+        let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: AVMediaType.video, position: .front)
+        guard let device = deviceDiscoverySession.devices.first else { return }
+        guard let input = try? AVCaptureDeviceInput(device: device) else { return }
+        captureSession?.addInput(input)
+        
+        self.addVideoOutput()
+    }
+    
+    private func addVideoOutput() {
+        self.videoOutput.videoSettings = [(kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(value: kCVPixelFormatType_32BGRA)] as [String : Any]
+        self.videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "my.image.handling.queue"))
+        self.captureSession?.addOutput(self.videoOutput)
+    }
 
     private func captureCamera() {
-        if let frontDevice = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: AVMediaType.video, position: .front).devices.first {
-            frontInput = try! AVCaptureDeviceInput(device: frontDevice)
-        }
-        
-        captureSession.beginConfiguration()
-        if let front = frontInput, captureSession.canAddInput(front) == true {
-          captureSession.addInput(front)
-        }
-
-        captureSession.isMultitaskingCameraAccessEnabled = true
-        captureSession.commitConfiguration()
-        
-        print("multitaskingCameraAccessSupported: \(captureSession.isMultitaskingCameraAccessSupported)")
-        print("multitaskingCameraAccessEnabled: \(captureSession.isMultitaskingCameraAccessEnabled)")
+        print("multitaskingCameraAccessSupported: \(captureSession?.isMultitaskingCameraAccessSupported)")
+        print("multitaskingCameraAccessEnabled: \(captureSession?.isMultitaskingCameraAccessEnabled)")
         
         let backgroundQueue = DispatchQueue(label: "com.app.queue", qos: .background)
         
         backgroundQueue.async {
-            self.captureSession.startRunning()
+            self.captureSession?.startRunning()
         }
         
     }
@@ -110,4 +116,19 @@ extension ViewController: AVPictureInPictureControllerDelegate {
         print(error)
     }
     
+}
+
+extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
+    func captureOutput(_ output: AVCaptureOutput,
+                       didOutput sampleBuffer: CMSampleBuffer,
+                       from connection: AVCaptureConnection) {
+        guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+            debugPrint("unable to get image from sample buffer")
+            return
+        }
+        
+        print(frame)
+        print("did receive image frame")
+        // process image here
+    }
 }
