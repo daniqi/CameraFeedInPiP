@@ -57,8 +57,8 @@ class ViewController: UIViewController {
         captureSession.commitConfiguration()
         captureSession.isMultitaskingCameraAccessEnabled = true
         
-        print(captureSession.isMultitaskingCameraAccessSupported)
-        print(captureSession.isMultitaskingCameraAccessEnabled)
+        print("multitaskingCameraAccessSupported: \(captureSession.isMultitaskingCameraAccessSupported)")
+        print("multitaskingCameraAccessEnabled: \(captureSession.isMultitaskingCameraAccessEnabled)")
         
         let backgroundQueue = DispatchQueue(label: "com.app.queue", qos: .background)
         
