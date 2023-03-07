@@ -49,7 +49,7 @@
 		9ED19C1629B61CFC00919A4D /* CameraFeedInPipUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraFeedInPipUITests.swift; sourceTree = "<group>"; };
 		9ED19C1829B61CFC00919A4D /* CameraFeedInPipUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraFeedInPipUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		9ED19C2529B6257900919A4D /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
-		9EEA73AC29B7490D00301AA3 /* CameraFeedInPip.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CameraFeedInPip.entitlements; sourceTree = "<group>"; };
+		9EEA73AD29B7D10E00301AA3 /* CameraFeedInPip.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CameraFeedInPip.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,7 +100,7 @@
 		9ED19BF429B61CFB00919A4D /* CameraFeedInPip */ = {
 			isa = PBXGroup;
 			children = (
-				9EEA73AC29B7490D00301AA3 /* CameraFeedInPip.entitlements */,
+				9EEA73AD29B7D10E00301AA3 /* CameraFeedInPip.entitlements */,
 				9ED19BF529B61CFB00919A4D /* AppDelegate.swift */,
 				9ED19BF729B61CFB00919A4D /* SceneDelegate.swift */,
 				9ED19BF929B61CFB00919A4D /* ViewController.swift */,

@@ -55,13 +55,11 @@ class ViewController: UIViewController {
     }
     
     private func setupPipController() {
-        
         let source = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: self.previewView!.sampleBufferDisplayLayer, playbackDelegate: self)
         
         pipController = AVPictureInPictureController(contentSource: source)
         pipController?.canStartPictureInPictureAutomaticallyFromInline = true
         pipController?.delegate = self
-        
     }
     
     private func setupSession() {
