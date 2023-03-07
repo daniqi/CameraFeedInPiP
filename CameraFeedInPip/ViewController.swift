@@ -58,10 +58,6 @@ class ViewController: UIViewController {
         
         let source = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: self.previewView!.sampleBufferDisplayLayer, playbackDelegate: self)
         
-//        let pipContentSource = AVPictureInPictureController.ContentSource(
-//            activeVideoCallSourceView: previewView!,
-//                contentViewController: pipVideoCallViewController!)
-
         pipController = AVPictureInPictureController(contentSource: source)
         pipController?.canStartPictureInPictureAutomaticallyFromInline = true
         pipController?.delegate = self
@@ -123,11 +119,12 @@ class ViewController: UIViewController {
 
 extension ViewController: AVPictureInPictureSampleBufferPlaybackDelegate {
     func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController, setPlaying playing: Bool) {
+//        pictureInPictureController.playerLayer.player?.play()
         print("test")
     }
 
     func pictureInPictureControllerTimeRangeForPlayback(_ pictureInPictureController: AVPictureInPictureController) -> CMTimeRange {
-        return CMTimeRange()
+        return CMTimeRange(start: .negativeInfinity, duration: .positiveInfinity)
     }
 
     func pictureInPictureControllerIsPlaybackPaused(_ pictureInPictureController: AVPictureInPictureController) -> Bool {
@@ -162,13 +159,12 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                        from connection: AVCaptureConnection) {
         
         
-        guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            debugPrint("unable to get image from sample buffer")
-            return
-        }
+        // give sampleBuffer to sampleBufferDisplayLayer
+        previewView!.sampleBufferDisplayLayer.enqueue(sampleBuffer)
         
-//        print(frame)
-//        print("did receive image frame")
-        // process image here
+//        guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+//            debugPrint("unable to get image from sample buffer")
+//            return
+//        }
     }
 }

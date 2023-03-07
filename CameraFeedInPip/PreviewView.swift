@@ -35,8 +35,11 @@ class PreviewView: UIView {
         super.init(frame: .zero)
         
 //        videoDisplayLayer.session = captureSession
+        
         sampleBufferDisplayLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
         sampleBufferDisplayLayer.frame = CGRect(x: 0, y: 0, width: 500, height: 500)
+        
+        
     }
     
     required init?(coder aDecoder: NSCoder) {
