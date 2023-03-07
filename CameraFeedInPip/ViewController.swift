@@ -12,6 +12,8 @@ class ViewController: UIViewController {
     
     var pipVideoCallViewController: AVPictureInPictureVideoCallViewController?
     
+    var pipController: AVPictureInPictureController?
+    
     private var startPipButton: UIButton = {
        var button = UIButton()
         button.setTitle("Start PiP", for: .normal)
@@ -36,10 +38,11 @@ class ViewController: UIViewController {
         pipVideoCallViewController = AVPictureInPictureVideoCallViewController()
         pipVideoCallViewController?.view?.addSubview(self.previewView!)
         
+//        present(pipVideoCallViewController!, animated: false)
         view.addSubview(pipVideoCallViewController!.view)
         
+        setupPipController()
         addStartPiPButton()
-        
         NotificationCenter.default.addObserver(self, selector: #selector(ViewController.sessionWasInterrupted(notification:)), name: NSNotification.Name.AVCaptureSessionWasInterrupted, object: captureSession)
         
     }
@@ -51,12 +54,28 @@ class ViewController: UIViewController {
         print(notification)
     }
     
+    private func setupPipController() {
+        
+        let source = AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer: self.previewView!.sampleBufferDisplayLayer, playbackDelegate: self)
+        
+//        let pipContentSource = AVPictureInPictureController.ContentSource(
+//            activeVideoCallSourceView: previewView!,
+//                contentViewController: pipVideoCallViewController!)
+
+        pipController = AVPictureInPictureController(contentSource: source)
+        pipController?.canStartPictureInPictureAutomaticallyFromInline = true
+        pipController?.delegate = self
+    }
+    
     private func setupSession() {
         captureSession = AVCaptureSession()
         let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: AVMediaType.video, position: .front)
         guard let device = deviceDiscoverySession.devices.first else { return }
         guard let input = try? AVCaptureDeviceInput(device: device) else { return }
         captureSession?.addInput(input)
+        
+        // Enable MultitaskingCamera
+        captureSession?.isMultitaskingCameraAccessEnabled = true
         
         self.addVideoOutput()
     }
@@ -81,16 +100,13 @@ class ViewController: UIViewController {
     
     @objc
     private func startPip() {
-        let pipContentSource = AVPictureInPictureController.ContentSource(
-            activeVideoCallSourceView: self.pipVideoCallViewController!.view,
-                contentViewController: pipVideoCallViewController!)
-
-        let pipController = AVPictureInPictureController(contentSource: pipContentSource)
-        pipController.canStartPictureInPictureAutomaticallyFromInline = true
-        pipController.delegate = self
-
-        pipController.startPictureInPicture()
-        
+        if pipController!.isPictureInPictureActive {
+            print("stop")
+            pipController?.stopPictureInPicture()
+        } else {
+            print("start")
+            pipController?.startPictureInPicture()
+        }
     }
     
     private func addStartPiPButton() {
@@ -103,6 +119,28 @@ class ViewController: UIViewController {
         ])
     }
     
+}
+
+extension ViewController: AVPictureInPictureSampleBufferPlaybackDelegate {
+    func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController, setPlaying playing: Bool) {
+        print("test")
+    }
+
+    func pictureInPictureControllerTimeRangeForPlayback(_ pictureInPictureController: AVPictureInPictureController) -> CMTimeRange {
+        return CMTimeRange()
+    }
+
+    func pictureInPictureControllerIsPlaybackPaused(_ pictureInPictureController: AVPictureInPictureController) -> Bool {
+        return true
+    }
+
+    func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController, didTransitionToRenderSize newRenderSize: CMVideoDimensions) {
+        print("test")
+    }
+
+    func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController, skipByInterval skipInterval: CMTime, completion completionHandler: @escaping () -> Void) {
+        print("test")
+    }
 }
 
 extension ViewController: AVPictureInPictureControllerDelegate {
@@ -122,13 +160,15 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput,
                        didOutput sampleBuffer: CMSampleBuffer,
                        from connection: AVCaptureConnection) {
+        
+        
         guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {
             debugPrint("unable to get image from sample buffer")
             return
         }
         
-        print(frame)
-        print("did receive image frame")
+//        print(frame)
+//        print("did receive image frame")
         // process image here
     }
 }

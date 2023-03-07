@@ -10,7 +10,7 @@ import AVKit
 
 class PreviewView: UIView {
     override class var layerClass: AnyClass {
-        AVCaptureVideoPreviewLayer.self
+        AVSampleBufferDisplayLayer.self
     }
     
     // TOOD: use AVSampleBufferDisplayLayer
@@ -22,16 +22,21 @@ class PreviewView: UIView {
     // Capture output:
     // https://anuragajwani.medium.com/how-to-process-images-real-time-from-the-ios-camera-9c416c531749
     
-    var videoDisplayLayer: AVCaptureVideoPreviewLayer {
-        layer as! AVCaptureVideoPreviewLayer
+    // Uitleg hoe AVSampleBufferDisplayLayer werkt in macOS.
+    // https://developer.apple.com/videos/play/wwdc2021/10290/
+    
+    // TODO: AVCaptureVideoPreviewLayer werkt niet, gebruik AVSampleBufferDisplayLayer
+    
+    var sampleBufferDisplayLayer: AVSampleBufferDisplayLayer {
+        layer as! AVSampleBufferDisplayLayer
     }
  
     public init(captureSession: AVCaptureSession) {
         super.init(frame: .zero)
         
-        videoDisplayLayer.session = captureSession
-        videoDisplayLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
-        videoDisplayLayer.frame = CGRect(x: 0, y: 0, width: 500, height: 500)
+//        videoDisplayLayer.session = captureSession
+        sampleBufferDisplayLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
+        sampleBufferDisplayLayer.frame = CGRect(x: 0, y: 0, width: 500, height: 500)
     }
     
     required init?(coder aDecoder: NSCoder) {
