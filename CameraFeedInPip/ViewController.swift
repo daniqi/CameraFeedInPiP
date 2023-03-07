@@ -61,6 +61,7 @@ class ViewController: UIViewController {
         pipController = AVPictureInPictureController(contentSource: source)
         pipController?.canStartPictureInPictureAutomaticallyFromInline = true
         pipController?.delegate = self
+        
     }
     
     private func setupSession() {
@@ -118,21 +119,30 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: AVPictureInPictureSampleBufferPlaybackDelegate {
+    // Tells the delegate that the user requested to begin or pause playback.
     func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController, setPlaying playing: Bool) {
 //        pictureInPictureController.playerLayer.player?.play()
-        print("test")
+        print("isPlaying")
+        
+        print(playing)
     }
-
+    
+    // Asks the delegate for the current playable time range.
     func pictureInPictureControllerTimeRangeForPlayback(_ pictureInPictureController: AVPictureInPictureController) -> CMTimeRange {
         return CMTimeRange(start: .negativeInfinity, duration: .positiveInfinity)
     }
-
+    
+    // Asks delegate to indicate whether the playback UI reflects a playing or paused state, regardless of the current playback rate.
     func pictureInPictureControllerIsPlaybackPaused(_ pictureInPictureController: AVPictureInPictureController) -> Bool {
+        print(pictureInPictureController.isPictureInPicturePossible)
         return true
     }
-
+    
+    // Tells the delegate that the user has requested skipping forward or backward by the indicated time interval.
     func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController, didTransitionToRenderSize newRenderSize: CMVideoDimensions) {
-        print("test")
+        print("didTransition")
+        
+        print(newRenderSize)
     }
 
     func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController, skipByInterval skipInterval: CMTime, completion completionHandler: @escaping () -> Void) {
@@ -160,7 +170,9 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         
         
         // give sampleBuffer to sampleBufferDisplayLayer
-        previewView!.sampleBufferDisplayLayer.enqueue(sampleBuffer)
+        DispatchQueue.main.async {
+            self.previewView!.sampleBufferDisplayLayer.enqueue(sampleBuffer)
+        }
         
 //        guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {
 //            debugPrint("unable to get image from sample buffer")
